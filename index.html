@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail de Demandes d'Accès - Sûreté SNCF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 3px solid #8d1b3d;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section h1 {
+            color: #8d1b3d;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .logo-section p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 30px;
+        }
+
+        /* Menu principal */
+        .menu-section {
+            background: #fff;
+            border-radius: 4px;
+            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .menu-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .menu-card {
+            background: #fafafa;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-card:hover {
+            border-color: #8d1b3d;
+            background: #fff;
+        }
+
+        .menu-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .menu-card p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Formulaires */
+        .form-section {
+            display: none;
+            background: #fff;
+            border-radius: 4px;
+            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-section h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #8d1b3d;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #d32f2f;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #8d1b3d;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .radio-item:hover {
+            background: #fff;
+            border-color: #8d1b3d;
+        }
+
+        .radio-item.selected {
+            background: #f1f8f4;
+            border-color: #2e7d32;
+        }
+
+        .radio-item.error {
+            background: #fef5f5;
+            border-color: #d32f2f;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        /* Alertes */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-success {
+            background: #f1f8f4;
+            color: #1e4620;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert-error {
+            background: #fef5f5;
+            color: #5f2120;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .alert-warning {
+            background: #fffbf0;
+            color: #663c00;
+            border-left: 4px solid #f57c00;
+        }
+
+        .alert-info {
+            background: #f0f7ff;
+            color: #014361;
+            border-left: 4px solid #1976d2;
+        }
+
+        /* Section conditionnelle */
+        .conditional-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+        }
+
+        .conditional-section.active {
+            display: block;
+        }
+
+        .conditional-section h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Boutons */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 3px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #8d1b3d;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #6d1530;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #fafafa;
+            border-color: #999;
+        }
+
+        .btn-admin {
+            background: #333;
+            color: white;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 20px;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 13px;
+        }
+
+        .btn-admin:hover {
+            background: #1a1a1a;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-content {
+            max-width: 1400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 4px;
+            padding: 40px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .admin-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-admin {
+            background: #d32f2f;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .close-admin:hover {
+            background: #b71c1c;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            color: #8d1b3d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+
+        .filter-section select {
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            min-width: 180px;
+        }
+
+        .demandes-list {
+            margin-top: 25px;
+        }
+
+        .demande-card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 3px solid #8d1b3d;
+        }
+
+        .demande-card.pending {
+            border-left-color: #f57c00;
+        }
+
+        .demande-card.approved {
+            border-left-color: #2e7d32;
+        }
+
+        .demande-card.rejected {
+            border-left-color: #d32f2f;
+        }
+
+        .demande-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .demande-info h4 {
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .demande-info p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .status-badge.approved {
+            background: #f1f8f4;
+            color: #1b5e20;
+        }
+
+        .status-badge.rejected {
+            background: #fef5f5;
+            color: #b71c1c;
+        }
+
+        .demande-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .demande-actions button {
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .admin-content {
+                padding: 30px 25px;
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .logo-section h1 {
+                font-size: 20px;
+            }
+
+            .logo-section p {
+                font-size: 13px;
+            }
+
+            .container {
+                padding: 0 20px;
+                margin: 20px auto;
+            }
+
+            .menu-section,
+            .form-section,
+            .admin-content {
+                padding: 25px 20px;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-card {
+                padding: 20px;
+            }
+
+            .form-section h2 {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 15px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .radio-item {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .btn-admin {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .filter-section select,
+            .filter-section button {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .demande-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .status-badge {
+                align-self: flex-start;
+            }
+
+            .demande-actions {
+                flex-direction: column;
+            }
+
+            .demande-actions button {
+                width: 100%;
+            }
+
+            .admin-content {
+                margin: 10px;
+                padding: 20px 15px;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .admin-header h2 {
+                font-size: 18px;
+            }
+
+            .close-admin {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0 15px;
+            }
+
+            .logo-section h1 {
+                font-size: 18px;
+            }
+
+            .container {
+                padding: 0 15px;
+                margin: 15px auto;
+            }
+
+            .menu-section,
+            .form-section {
+                padding: 20px 15px;
+            }
+
+            .form-section h2 {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-size: 14px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                font-size: 13px;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="tel"],
+            input[type="date"],
+            textarea,
+            select {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .radio-item {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            button {
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+
+            .stat-card h3 {
+                font-size: 24px;
+            }
+
+            .stat-card p {
+                font-size: 12px;
+            }
+
+            .demande-info h4 {
+                font-size: 14px;
+            }
+
+            .demande-info p {
+                font-size: 12px;
+            }
+
+            .btn-admin {
+                bottom: 15px;
+                right: 15px;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>Portail de Demandes d'Accès</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alert-container"></div>
+
+        <!-- Menu Principal -->
+        <div id="menu-principal" class="menu-section">
+            <h2>Sélectionnez le type de demande</h2>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="selectDemande('canif')">
+                    <h3>Accès CANIF</h3>
+                    <p>Demande d'accès aux zones sécurisées</p>
+                </div>
+                <div class="menu-card" onclick="selectDemande('badge')">
+                    <h3>Badge Visiteur</h3>
+                    <p>Badge d'accès temporaire pour visiteur</p>
+                </div>
+                <div class="menu-card" onclick="selectDemande('tncpaz')">
+                    <h3>Visiteur TnC Paz</h3>
+                    <p>Visiteur sur le site du TnC Paz</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire Accès CANIF -->
+        <div id="form-canif" class="form-section">
+            <h2>Demande d'Accès CANIF</h2>
+            
+            <form id="canif-form">
+                <div class="section">
+                    <div class="section-title">Informations du demandeur</div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nom <span class="required">*</span></label>
+                            <input type="text" id="canif_nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom <span class="required">*</span></label>
+                            <input type="text" id="canif_prenom" required>
+                        </div>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Matricule <span class="required">*</span></label>
+                            <input type="text" id="canif_matricule" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Équipe <span class="required">*</span></label>
+                            <input type="text" id="canif_equipe" required>
+                        </div>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>UO (Unité Opérationnelle) <span class="required">*</span></label>
+                            <input type="text" id="canif_uo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fonction <span class="required">*</span></label>
+                            <input type="text" id="canif_fonction" required>
+                        </div>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Téléphone <span class="required">*</span></label>
+                            <input type="tel" id="canif_telephone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" id="canif_email" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Attestation SECUFER</div>
+                    
+                    <div class="form-group">
+                        <label>Disposez-vous d'une attestation SECUFER valide ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="selectSecufer('canif', 'oui')">
+                                <input type="radio" name="canif_secufer" value="oui" id="canif_secufer_oui">
+                                <label for="canif_secufer_oui">Oui</label>
+                            </div>
+                            <div class="radio-item" onclick="selectSecufer('canif', 'non')">
+                                <input type="radio" name="canif_secufer" value="non" id="canif_secufer_non">
+                                <label for="canif_secufer_non">Non</label>
+                            </div>
+                            <div class="radio-item" onclick="selectSecufer('canif', 'encours')">
+                                <input type="radio" name="canif_secufer" value="encours" id="canif_secufer_encours">
+                                <label for="canif_secufer_encours">En cours</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="canif_secufer_alert"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Détails de la demande</div>
+                    
+                    <div class="form-group">
+                        <label>Motif de la demande <span class="required">*</span></label>
+                        <textarea id="canif_motif" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Périmètres d'accès souhaités <span class="required">*</span></label>
+                        <textarea id="canif_perimetres" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date de début souhaitée <span class="required">*</span></label>
+                        <input type="date" id="canif_dateDebut" required>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Validation hiérarchique</div>
+                    
+                    <div class="form-group">
+                        <label>Cette demande nécessite-t-elle une validation hiérarchique ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="toggleValidation('canif', true)">
+                                <input type="radio" name="canif_validation" value="oui" id="canif_validation_oui">
+                                <label for="canif_validation_oui">Oui</label>
+                            </div>
+                            <div class="radio-item" onclick="toggleValidation('canif', false)">
+                                <input type="radio" name="canif_validation" value="non" id="canif_validation_non">
+                                <label for="canif_validation_non">Non</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="canif_validation_section" class="conditional-section">
+                        <h4>Informations du supérieur hiérarchique</h4>
+                        
+                        <div class="two-columns">
+                            <div class="form-group">
+                                <label>Nom <span class="required">*</span></label>
+                                <input type="text" id="canif_valideur_nom">
+                            </div>
+                            <div class="form-group">
+                                <label>Prénom <span class="required">*</span></label>
+                                <input type="text" id="canif_valideur_prenom">
+                            </div>
+                        </div>
+
+                        <div class="two-columns">
+                            <div class="form-group">
+                                <label>Fonction <span class="required">*</span></label>
+                                <input type="text" id="canif_valideur_fonction">
+                            </div>
+                            <div class="form-group">
+                                <label>Unité / Service <span class="required">*</span></label>
+                                <input type="text" id="canif_valideur_service">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Annuler</button>
+                    <button type="submit" class="btn-primary" id="canif_submit">Soumettre la demande</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Formulaire Badge Visiteur -->
+        <div id="form-badge" class="form-section">
+            <h2>Demande de Badge Visiteur</h2>
+            
+            <form id="badge-form">
+                <div class="section">
+                    <div class="section-title">Type de demandeur</div>
+                    
+                    <div class="form-group">
+                        <label>Êtes-vous agent SNCF ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="toggleBadgeDemandeur(true)">
+                                <input type="radio" name="badge_est_sncf" value="oui" id="badge_est_sncf_oui">
+                                <label for="badge_est_sncf_oui">Oui, je suis agent SNCF</label>
+                            </div>
+                            <div class="radio-item" onclick="toggleBadgeDemandeur(false)">
+                                <input type="radio" name="badge_est_sncf" value="non" id="badge_est_sncf_non">
+                                <label for="badge_est_sncf_non">Non, je ne fais pas partie de la SNCF</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="badge_section_agent_sncf" class="section conditional-section">
+                    <div class="section-title">Informations du demandeur (Agent SNCF)</div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nom <span class="required">*</span></label>
+                            <input type="text" id="badge_demandeur_nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom <span class="required">*</span></label>
+                            <input type="text" id="badge_demandeur_prenom" required>
+                        </div>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Matricule <span class="required">*</span></label>
+                            <input type="text" id="badge_demandeur_matricule" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Équipe <span class="required">*</span></label>
+                            <input type="text" id="badge_demandeur_equipe" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" id="badge_demandeur_email" required>
+                    </div>
+                </div>
+
+                <div id="badge_section_visiteur_externe" class="section conditional-section">
+                    <div class="section-title">Informations du visiteur</div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nom <span class="required">*</span></label>
+                            <input type="text" id="badge_visiteur_externe_nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom <span class="required">*</span></label>
+                            <input type="text" id="badge_visiteur_externe_prenom">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Société <span class="required">*</span></label>
+                        <input type="text" id="badge_visiteur_externe_societe">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" id="badge_visiteur_externe_email">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Attestation SECUFER</div>
+                    
+                    <div class="form-group">
+                        <label>Disposez-vous d'une attestation SECUFER valide ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="selectSecufer('badge', 'oui')">
+                                <input type="radio" name="badge_secufer" value="oui" id="badge_secufer_oui">
+                                <label for="badge_secufer_oui">Oui</label>
+                            </div>
+                            <div class="radio-item" onclick="selectSecufer('badge', 'non')">
+                                <input type="radio" name="badge_secufer" value="non" id="badge_secufer_non">
+                                <label for="badge_secufer_non">Non</label>
+                            </div>
+                            <div class="radio-item" onclick="selectSecufer('badge', 'encours')">
+                                <input type="radio" name="badge_secufer" value="encours" id="badge_secufer_encours">
+                                <label for="badge_secufer_encours">En cours</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="badge_secufer_alert"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Validation hiérarchique</div>
+                    
+                    <div class="form-group">
+                        <label>Cette demande nécessite-t-elle une validation hiérarchique ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="toggleValidation('badge', true)">
+                                <input type="radio" name="badge_validation" value="oui" id="badge_validation_oui">
+                                <label for="badge_validation_oui">Oui</label>
+                            </div>
+                            <div class="radio-item" onclick="toggleValidation('badge', false)">
+                                <input type="radio" name="badge_validation" value="non" id="badge_validation_non">
+                                <label for="badge_validation_non">Non</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="badge_validation_section" class="conditional-section">
+                        <h4>Informations du supérieur hiérarchique</h4>
+                        
+                        <div class="two-columns">
+                            <div class="form-group">
+                                <label>Nom <span class="required">*</span></label>
+                                <input type="text" id="badge_valideur_nom">
+                            </div>
+                            <div class="form-group">
+                                <label>Prénom <span class="required">*</span></label>
+                                <input type="text" id="badge_valideur_prenom">
+                            </div>
+                        </div>
+
+                        <div class="two-columns">
+                            <div class="form-group">
+                                <label>Fonction <span class="required">*</span></label>
+                                <input type="text" id="badge_valideur_fonction">
+                            </div>
+                            <div class="form-group">
+                                <label>Unité / Service <span class="required">*</span></label>
+                                <input type="text" id="badge_valideur_service">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Annuler</button>
+                    <button type="submit" class="btn-primary" id="badge_submit">Soumettre la demande</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Formulaire Visiteur TnC Paz -->
+        <div id="form-tncpaz" class="form-section">
+            <h2>Visiteur sur le site du TnC Paz</h2>
+            
+            <form id="tncpaz-form">
+                <div class="section">
+                    <div class="section-title">Informations du visiteur</div>
+                    
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nom <span class="required">*</span></label>
+                            <input type="text" id="tncpaz_nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom <span class="required">*</span></label>
+                            <input type="text" id="tncpaz_prenom" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Entreprise <span class="required">*</span></label>
+                        <input type="text" id="tncpaz_entreprise" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Entrée ? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="selectRadio('tncpaz_entree', 'massena')">
+                                <input type="radio" name="tncpaz_entree" value="massena" id="tncpaz_entree_massena">
+                                <label for="tncpaz_entree_massena">Masséna</label>
+                            </div>
+                            <div class="radio-item" onclick="selectRadio('tncpaz_entree', 'ivry')">
+                                <input type="radio" name="tncpaz_entree" value="ivry" id="tncpaz_entree_ivry">
+                                <label for="tncpaz_entree_ivry">Ivry</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Déplacement</div>
+                    
+                    <div class="form-group">
+                        <label>Mode de déplacement <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="selectRadio('tncpaz_deplacement', 'pieton')">
+                                <input type="radio" name="tncpaz_deplacement" value="pieton" id="tncpaz_deplacement_pieton">
+                                <label for="tncpaz_deplacement_pieton">Piéton</label>
+                            </div>
+                            <div class="radio-item" onclick="selectRadio('tncpaz_deplacement', 'vehicule')">
+                                <input type="radio" name="tncpaz_deplacement" value="vehicule" id="tncpaz_deplacement_vehicule">
+                                <label for="tncpaz_deplacement_vehicule">Véhicule</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tncpaz_vehicule_section" class="conditional-section">
+                        <div class="form-group">
+                            <label>Si véhicule, renseigner l'immatriculation <span class="required">*</span></label>
+                            <input type="text" id="tncpaz_immatriculation">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Informations de visite</div>
+                    
+                    <div class="form-group">
+                        <label>Nom accompagnateur SNCF <span class="required">*</span></label>
+                        <input type="text" id="tncpaz_accompagnateur" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Motif de la visite <span class="required">*</span></label>
+                        <textarea id="tncpaz_motif" required></textarea>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Annuler</button>
+                    <button type="submit" class="btn-primary" id="tncpaz_submit">Soumettre la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Panel Admin -->
+    <div id="admin-panel" class="admin-panel">
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>Espace Administrateur</h2>
+                <button class="close-admin" onclick="closeAdmin()">Fermer</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="stat-total">0</h3>
+                    <p>Total des demandes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-pending">0</h3>
+                    <p>En attente</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-approved">0</h3>
+                    <p>Approuvées</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-rejected">0</h3>
+                    <p>Refusées</p>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <select id="filter-type" onchange="filterDemandes()">
+                    <option value="">Tous les types</option>
+                    <option value="canif">Accès CANIF</option>
+                    <option value="badge">Badge Visiteur</option>
+                    <option value="tncpaz">Visiteur TnC Paz</option>
+                </select>
+
+                <select id="filter-status" onchange="filterDemandes()">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending">En attente</option>
+                    <option value="approved">Approuvées</option>
+                    <option value="rejected">Refusées</option>
+                </select>
+
+                <button class="btn-primary" onclick="exportAllPDF()" style="margin-left: auto;">Exporter tout en PDF</button>
+            </div>
+
+            <div class="demandes-list" id="demandes-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = '';
+        let demandes = JSON.parse(localStorage.getItem('sncf_demandes') || '[]');
+
+        function generateUniqueId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 10000);
+            return `SNCF-${timestamp}-${random}`;
+        }
+
+        function selectDemande(type) {
+            currentType = type;
+            document.getElementById('menu-principal').style.display = 'none';
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`form-${type}`).classList.add('active');
+        }
+
+        function resetForm() {
+            currentType = '';
+            document.getElementById('menu-principal').style.display = 'block';
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('form').forEach(form => form.reset());
+            document.querySelectorAll('.conditional-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('[id$="_secufer_alert"]').forEach(alert => {
+                alert.innerHTML = '';
+            });
+            document.querySelectorAll('.radio-item').forEach(item => {
+                item.classList.remove('selected', 'error');
+            });
+        }
+
+        function selectSecufer(type, value) {
+            const alertDiv = document.getElementById(`${type}_secufer_alert`);
+            const submitBtn = document.getElementById(`${type}_submit`);
+            
+            document.querySelectorAll(`input[name="${type}_secufer"]`).forEach(radio => {
+                radio.parentElement.classList.remove('selected', 'error');
+            });
+            
+            document.getElementById(`${type}_secufer_${value}`).parentElement.classList.add('selected');
+            
+            if (value === 'oui') {
+                alertDiv.innerHTML = `
+                    <div class="alert alert-success active">
+                        <strong>Attestation SECUFER validée</strong><br>
+                        Votre demande peut être traitée.
+                    </div>
+                `;
+                submitBtn.disabled = false;
+            } else {
+                document.getElementById(`${type}_secufer_${value}`).parentElement.classList.remove('selected');
+                document.getElementById(`${type}_secufer_${value}`).parentElement.classList.add('error');
+                
+                alertDiv.innerHTML = `
+                    <div class="alert alert-error active">
+                        <strong>Accès refusé</strong><br>
+                        Les accès ne peuvent être délivrés sans attestation SECUFER valide.
+                        ${value === 'encours' ? 'Veuillez attendre la validation de votre attestation.' : 'Veuillez obtenir une attestation SECUFER.'}
+                    </div>
+                `;
+                submitBtn.disabled = true;
+            }
+        }
+
+        function toggleValidation(type, required) {
+            const section = document.getElementById(`${type}_validation_section`);
+            if (required) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        }
+
+        function toggleBadgeDemandeur(estSncf) {
+            const sectionAgentSncf = document.getElementById('badge_section_agent_sncf');
+            const sectionVisiteurExterne = document.getElementById('badge_section_visiteur_externe');
+            
+            // Sélectionner le radio bouton
+            document.querySelectorAll('input[name="badge_est_sncf"]').forEach(radio => {
+                radio.parentElement.classList.remove('selected');
+            });
+            
+            if (estSncf) {
+                document.getElementById('badge_est_sncf_oui').parentElement.classList.add('selected');
+                sectionAgentSncf.classList.add('active');
+                sectionVisiteurExterne.classList.remove('active');
+                
+                // Rendre les champs agent SNCF requis
+                document.getElementById('badge_demandeur_nom').required = true;
+                document.getElementById('badge_demandeur_prenom').required = true;
+                document.getElementById('badge_demandeur_matricule').required = true;
+                document.getElementById('badge_demandeur_equipe').required = true;
+                document.getElementById('badge_demandeur_email').required = true;
+                
+                // Retirer le required des champs visiteur externe
+                document.getElementById('badge_visiteur_externe_nom').required = false;
+                document.getElementById('badge_visiteur_externe_prenom').required = false;
+                document.getElementById('badge_visiteur_externe_societe').required = false;
+                document.getElementById('badge_visiteur_externe_email').required = false;
+            } else {
+                document.getElementById('badge_est_sncf_non').parentElement.classList.add('selected');
+                sectionAgentSncf.classList.remove('active');
+                sectionVisiteurExterne.classList.add('active');
+                
+                // Retirer le required des champs agent SNCF
+                document.getElementById('badge_demandeur_nom').required = false;
+                document.getElementById('badge_demandeur_prenom').required = false;
+                document.getElementById('badge_demandeur_matricule').required = false;
+                document.getElementById('badge_demandeur_equipe').required = false;
+                document.getElementById('badge_demandeur_email').required = false;
+                
+                // Rendre les champs visiteur externe requis
+                document.getElementById('badge_visiteur_externe_nom').required = true;
+                document.getElementById('badge_visiteur_externe_prenom').required = true;
+                document.getElementById('badge_visiteur_externe_societe').required = true;
+                document.getElementById('badge_visiteur_externe_email').required = true;
+            }
+        }
+
+        function selectRadio(name, value) {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                radio.parentElement.classList.remove('selected');
+            });
+            document.getElementById(`${name}_${value}`).parentElement.classList.add('selected');
+            
+            // Gérer l'affichage conditionnel pour le véhicule
+            if (name === 'tncpaz_deplacement') {
+                const vehiculeSection = document.getElementById('tncpaz_vehicule_section');
+                if (value === 'vehicule') {
+                    vehiculeSection.classList.add('active');
+                } else {
+                    vehiculeSection.classList.remove('active');
+                }
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} active`;
+            alertDiv.innerHTML = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('active');
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 5000);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getCanifData() {
+            const secuferValue = document.querySelector('input[name="canif_secufer"]:checked')?.value;
+            const validationRequise = document.querySelector('input[name="canif_validation"]:checked')?.value === 'oui';
+            
+            return {
+                id: generateUniqueId(),
+                type: 'canif',
+                typeName: 'Accès CANIF',
+                timestamp: new Date().toISOString(),
+                status: (secuferValue === 'oui' && validationRequise) ? 'pending' : (secuferValue === 'oui' ? 'approved' : 'rejected'),
+                demandeur: {
+                    nom: document.getElementById('canif_nom').value,
+                    prenom: document.getElementById('canif_prenom').value,
+                    matricule: document.getElementById('canif_matricule').value,
+                    equipe: document.getElementById('canif_equipe').value,
+                    uo: document.getElementById('canif_uo').value,
+                    fonction: document.getElementById('canif_fonction').value,
+                    telephone: document.getElementById('canif_telephone').value,
+                    email: document.getElementById('canif_email').value
+                },
+                secufer: secuferValue,
+                details: {
+                    motif: document.getElementById('canif_motif').value,
+                    perimetres: document.getElementById('canif_perimetres').value,
+                    dateDebut: document.getElementById('canif_dateDebut').value
+                },
+                validation: validationRequise ? {
+                    requise: true,
+                    valideur: {
+                        nom: document.getElementById('canif_valideur_nom').value,
+                        prenom: document.getElementById('canif_valideur_prenom').value,
+                        fonction: document.getElementById('canif_valideur_fonction').value,
+                        service: document.getElementById('canif_valideur_service').value
+                    }
+                } : { requise: false }
+            };
+        }
+
+        function getBadgeData() {
+            const estSncf = document.querySelector('input[name="badge_est_sncf"]:checked')?.value === 'oui';
+            const secuferValue = document.querySelector('input[name="badge_secufer"]:checked')?.value;
+            const validationRequise = document.querySelector('input[name="badge_validation"]:checked')?.value === 'oui';
+            
+            let demandeurData = {};
+            
+            if (estSncf) {
+                // Agent SNCF
+                demandeurData = {
+                    nom: document.getElementById('badge_demandeur_nom').value,
+                    prenom: document.getElementById('badge_demandeur_prenom').value,
+                    matricule: document.getElementById('badge_demandeur_matricule').value,
+                    equipe: document.getElementById('badge_demandeur_equipe').value,
+                    email: document.getElementById('badge_demandeur_email').value,
+                    type: 'agent_sncf'
+                };
+            } else {
+                // Visiteur externe
+                demandeurData = {
+                    nom: document.getElementById('badge_visiteur_externe_nom').value,
+                    prenom: document.getElementById('badge_visiteur_externe_prenom').value,
+                    matricule: 'N/A',
+                    societe: document.getElementById('badge_visiteur_externe_societe').value,
+                    email: document.getElementById('badge_visiteur_externe_email').value,
+                    type: 'visiteur_externe'
+                };
+            }
+            
+            return {
+                id: generateUniqueId(),
+                type: 'badge',
+                typeName: 'Badge Visiteur',
+                timestamp: new Date().toISOString(),
+                status: (secuferValue === 'oui' && validationRequise) ? 'pending' : (secuferValue === 'oui' ? 'approved' : 'rejected'),
+                demandeur: demandeurData,
+                secufer: secuferValue,
+                validation: validationRequise ? {
+                    requise: true,
+                    valideur: {
+                        nom: document.getElementById('badge_valideur_nom').value,
+                        prenom: document.getElementById('badge_valideur_prenom').value,
+                        fonction: document.getElementById('badge_valideur_fonction').value,
+                        service: document.getElementById('badge_valideur_service').value
+                    }
+                } : { requise: false }
+            };
+        }
+
+        function getTncPazData() {
+            const deplacement = document.querySelector('input[name="tncpaz_deplacement"]:checked')?.value;
+            
+            return {
+                id: generateUniqueId(),
+                type: 'tncpaz',
+                typeName: 'Visiteur TnC Paz',
+                timestamp: new Date().toISOString(),
+                status: 'approved',
+                visiteur: {
+                    nom: document.getElementById('tncpaz_nom').value,
+                    prenom: document.getElementById('tncpaz_prenom').value,
+                    entreprise: document.getElementById('tncpaz_entreprise').value,
+                    entree: document.querySelector('input[name="tncpaz_entree"]:checked')?.value,
+                    deplacement: deplacement,
+                    immatriculation: deplacement === 'vehicule' ? document.getElementById('tncpaz_immatriculation').value : '',
+                    accompagnateur: document.getElementById('tncpaz_accompagnateur').value,
+                    motif: document.getElementById('tncpaz_motif').value
+                }
+            };
+        }
+
+        function saveDemande(data) {
+            demandes.push(data);
+            localStorage.setItem('sncf_demandes', JSON.stringify(demandes));
+            generatePDF(data);
+            return data.id;
+        }
+
+        function generatePDF(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let y = 20;
+            const lineHeight = 7;
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            
+            doc.setFillColor(141, 27, 61);
+            doc.rect(0, 0, pageWidth, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text('DEMANDE D\'ACCÈS SÛRETÉ', pageWidth / 2, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text(`${data.typeName}`, pageWidth / 2, 25, { align: 'center' });
+            
+            const date = new Date(data.timestamp);
+            doc.setFontSize(9);
+            doc.text(`ID: ${data.id}`, pageWidth / 2, 32, { align: 'center' });
+            doc.text(`${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR')}`, pageWidth / 2, 37, { align: 'center' });
+            
+            y = 50;
+            doc.setTextColor(0, 0, 0);
+            
+            const statusText = data.status === 'approved' ? 'APPROUVÉE' : 
+                              data.status === 'pending' ? 'EN ATTENTE' : 
+                              'REFUSÉE';
+            const statusColor = data.status === 'approved' ? [46, 125, 50] : 
+                               data.status === 'pending' ? [245, 124, 0] : 
+                               [211, 47, 47];
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+            doc.text(`Statut: ${statusText}`, margin, y);
+            doc.setTextColor(0, 0, 0);
+            y += lineHeight + 5;
+            
+            doc.setFontSize(13);
+            doc.text('Informations du demandeur', margin, y);
+            y += lineHeight + 2;
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Nom: ${data.demandeur.nom}`, margin, y);
+            doc.text(`Prénom: ${data.demandeur.prenom}`, margin + 90, y);
+            y += lineHeight;
+            
+            doc.text(`Matricule: ${data.demandeur.matricule}`, margin, y);
+            if (data.demandeur.equipe) {
+                doc.text(`Équipe: ${data.demandeur.equipe}`, margin + 90, y);
+            } else if (data.demandeur.service) {
+                doc.text(`Service: ${data.demandeur.service}`, margin + 90, y);
+            }
+            y += lineHeight;
+            
+            if (data.demandeur.uo) {
+                doc.text(`UO: ${data.demandeur.uo}`, margin, y);
+                if (data.demandeur.fonction) {
+                    doc.text(`Fonction: ${data.demandeur.fonction}`, margin + 90, y);
+                }
+                y += lineHeight;
+            }
+            
+            if (data.demandeur.telephone) {
+                doc.text(`Téléphone: ${data.demandeur.telephone}`, margin, y);
+                y += lineHeight;
+            }
+            
+            doc.text(`Email: ${data.demandeur.email}`, margin, y);
+            y += lineHeight + 5;
+            
+            // Section SECUFER (seulement si applicable)
+            if (data.secufer) {
+                doc.setFontSize(13);
+                doc.setFont(undefined, 'bold');
+                doc.text('Attestation SECUFER', margin, y);
+                y += lineHeight + 2;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                const secuferText = data.secufer === 'oui' ? 'Oui - Attestation valide' : 
+                                   data.secufer === 'encours' ? 'En cours' : 
+                                   'Non';
+                doc.text(`Attestation: ${secuferText}`, margin, y);
+                y += lineHeight + 5;
+            }
+            
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            
+            if (data.type === 'canif') {
+                doc.text('Détails de la demande', margin, y);
+                y += lineHeight + 2;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text('Motif:', margin, y);
+                y += lineHeight;
+                const motifLines = doc.splitTextToSize(data.details.motif, pageWidth - 2 * margin);
+                doc.text(motifLines, margin, y);
+                y += motifLines.length * lineHeight + 3;
+                
+                doc.text('Périmètres:', margin, y);
+                y += lineHeight;
+                const perimetresLines = doc.splitTextToSize(data.details.perimetres, pageWidth - 2 * margin);
+                doc.text(perimetresLines, margin, y);
+                y += perimetresLines.length * lineHeight + 3;
+                
+                doc.text(`Date de début: ${data.details.dateDebut}`, margin, y);
+                y += lineHeight + 5;
+            } else if (data.type === 'tncpaz') {
+                doc.text('Informations du visiteur TnC Paz', margin, y);
+                y += lineHeight + 2;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Nom: ${data.visiteur.nom}`, margin, y);
+                doc.text(`Prénom: ${data.visiteur.prenom}`, margin + 90, y);
+                y += lineHeight;
+                
+                doc.text(`Entreprise: ${data.visiteur.entreprise}`, margin, y);
+                y += lineHeight;
+                
+                doc.text(`Entrée: ${data.visiteur.entree === 'massena' ? 'Masséna' : 'Ivry'}`, margin, y);
+                y += lineHeight;
+                
+                doc.text(`Déplacement: ${data.visiteur.deplacement === 'pieton' ? 'Piéton' : 'Véhicule'}`, margin, y);
+                y += lineHeight;
+                
+                if (data.visiteur.immatriculation) {
+                    doc.text(`Immatriculation: ${data.visiteur.immatriculation}`, margin, y);
+                    y += lineHeight;
+                }
+                
+                doc.text(`Accompagnateur SNCF: ${data.visiteur.accompagnateur}`, margin, y);
+                y += lineHeight;
+                
+                doc.text('Motif de la visite:', margin, y);
+                y += lineHeight;
+                const motifTncLines = doc.splitTextToSize(data.visiteur.motif, pageWidth - 2 * margin);
+                doc.text(motifTncLines, margin, y);
+                y += motifTncLines.length * lineHeight + 5;
+            } else {
+                doc.text('Informations du visiteur', margin, y);
+                y += lineHeight + 2;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Nom: ${data.visiteur.nom}`, margin, y);
+                doc.text(`Prénom: ${data.visiteur.prenom}`, margin + 90, y);
+                y += lineHeight;
+                
+                doc.text(`Société: ${data.visiteur.societe}`, margin, y);
+                y += lineHeight;
+                
+                doc.text(`Date: ${data.visiteur.date}`, margin, y);
+                if (data.visiteur.duree) {
+                    doc.text(`Durée: ${data.visiteur.duree}`, margin + 90, y);
+                }
+                y += lineHeight;
+                
+                if (data.visiteur.site) {
+                    doc.text(`Site: ${data.visiteur.site}`, margin, y);
+                    y += lineHeight;
+                }
+                
+                doc.text('Motif:', margin, y);
+                y += lineHeight;
+                const motifLines = doc.splitTextToSize(data.visiteur.motif, pageWidth - 2 * margin);
+                doc.text(motifLines, margin, y);
+                y += motifLines.length * lineHeight + 3;
+                
+                if (data.visiteur.zones) {
+                    doc.text('Zones:', margin, y);
+                    y += lineHeight;
+                    const zonesLines = doc.splitTextToSize(data.visiteur.zones, pageWidth - 2 * margin);
+                    doc.text(zonesLines, margin, y);
+                    y += zonesLines.length * lineHeight + 5;
+                }
+            }
+            
+            if (y > 230) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            doc.text('Validation hiérarchique', margin, y);
+            y += lineHeight + 2;
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            if (data.validation && data.validation.requise) {
+                doc.text('Validation requise: Oui', margin, y);
+                y += lineHeight + 2;
+                
+                doc.text(`Valideur: ${data.validation.valideur.nom} ${data.validation.valideur.prenom}`, margin, y);
+                y += lineHeight;
+                doc.text(`Fonction: ${data.validation.valideur.fonction}`, margin, y);
+                y += lineHeight;
+                doc.text(`Service: ${data.validation.valideur.service}`, margin, y);
+            } else {
+                doc.text('Validation requise: Non', margin, y);
+            }
+            
+            const fileName = `Demande_${data.type}_${data.demandeur.nom}_${data.id}.pdf`;
+            doc.save(fileName);
+        }
+
+        document.getElementById('canif-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = getCanifData();
+            const id = saveDemande(data);
+            
+            let message = `<strong>Demande enregistrée</strong><br>ID: ${id}<br>`;
+            if (data.status === 'pending') {
+                message += 'En attente de validation hiérarchique.';
+            } else if (data.status === 'approved') {
+                message += 'Demande approuvée automatiquement.';
+            } else {
+                message += 'Demande refusée (attestation SECUFER manquante).';
+            }
+            
+            showAlert(message, data.status === 'rejected' ? 'error' : 'success');
+            setTimeout(() => resetForm(), 3000);
+        });
+
+        document.getElementById('badge-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = getBadgeData();
+            const id = saveDemande(data);
+            
+            let message = `<strong>Demande enregistrée</strong><br>ID: ${id}<br>`;
+            if (data.status === 'pending') {
+                message += 'En attente de validation hiérarchique.';
+            } else if (data.status === 'approved') {
+                message += 'Demande approuvée automatiquement.';
+            } else {
+                message += 'Demande refusée (attestation SECUFER manquante).';
+            }
+            
+            showAlert(message, data.status === 'rejected' ? 'error' : 'success');
+            setTimeout(() => resetForm(), 3000);
+        });
+
+        document.getElementById('tncpaz-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = getTncPazData();
+            const id = saveDemande(data);
+            
+            let message = `<strong>Demande enregistrée</strong><br>ID: ${id}<br>Demande approuvée automatiquement.`;
+            
+            showAlert(message, 'success');
+            setTimeout(() => resetForm(), 3000);
+        });
+
+        function openAdmin() {
+            document.getElementById('admin-panel').classList.add('active');
+            loadAdminData();
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.remove('active');
+        }
+
+        function loadAdminData() {
+            demandes = JSON.parse(localStorage.getItem('sncf_demandes') || '[]');
+            
+            const total = demandes.length;
+            const pending = demandes.filter(d => d.status === 'pending').length;
+            const approved = demandes.filter(d => d.status === 'approved').length;
+            const rejected = demandes.filter(d => d.status === 'rejected').length;
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-approved').textContent = approved;
+            document.getElementById('stat-rejected').textContent = rejected;
+            
+            displayDemandes();
+        }
+
+        function displayDemandes(filteredDemandes = null) {
+            const list = document.getElementById('demandes-list');
+            const toDisplay = filteredDemandes || demandes;
+            
+            if (toDisplay.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Aucune demande trouvée.</p>';
+                return;
+            }
+            
+            const sorted = [...toDisplay].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            list.innerHTML = sorted.map(demande => {
+                const date = new Date(demande.timestamp);
+                const statusText = demande.status === 'approved' ? 'Approuvée' : 
+                                  demande.status === 'pending' ? 'En attente' : 
+                                  'Refusée';
+                
+                return `
+                    <div class="demande-card ${demande.status}">
+                        <div class="demande-header">
+                            <div class="demande-info">
+                                <h4>${demande.typeName} - ${demande.demandeur.nom} ${demande.demandeur.prenom}</h4>
+                                <p>ID: ${demande.id}</p>
+                                <p>${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR')}</p>
+                                <p>Matricule: ${demande.demandeur.matricule} | ${demande.demandeur.email}</p>
+                                ${demande.validation.requise ? '<p><strong>Validation hiérarchique requise</strong></p>' : ''}
+                            </div>
+                            <span class="status-badge ${demande.status}">${statusText}</span>
+                        </div>
+                        <div class="demande-actions">
+                            <button class="btn-primary" onclick="viewDetails('${demande.id}')">Détails</button>
+                            <button class="btn-primary" onclick="downloadPDF('${demande.id}')">PDF</button>
+                            ${demande.status === 'pending' ? `
+                                <button class="btn-primary" style="background: #2e7d32;" onclick="updateStatus('${demande.id}', 'approved')">Approuver</button>
+                                <button class="btn-primary" style="background: #d32f2f;" onclick="updateStatus('${demande.id}', 'rejected')">Refuser</button>
+                            ` : ''}
+                            <button class="btn-secondary" onclick="deleteDemande('${demande.id}')">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterDemandes() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            
+            let filtered = demandes;
+            
+            if (typeFilter) {
+                filtered = filtered.filter(d => d.type === typeFilter);
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(d => d.status === statusFilter);
+            }
+            
+            displayDemandes(filtered);
+        }
+
+        function viewDetails(id) {
+            const demande = demandes.find(d => d.id === id);
+            if (!demande) return;
+            
+            let details = `Type: ${demande.typeName}\nID: ${demande.id}\nDate: ${new Date(demande.timestamp).toLocaleString('fr-FR')}\nStatut: ${demande.status === 'approved' ? 'Approuvée' : demande.status === 'pending' ? 'En attente' : 'Refusée'}\n\nDemandeur: ${demande.demandeur.nom} ${demande.demandeur.prenom}\nMatricule: ${demande.demandeur.matricule}\nEmail: ${demande.demandeur.email}\n\nSECUFER: ${demande.secufer === 'oui' ? 'Valide' : demande.secufer === 'encours' ? 'En cours' : 'Non'}`;
+            
+            if (demande.validation.requise) {
+                details += `\n\nValidation hiérarchique requise\nValideur: ${demande.validation.valideur.nom} ${demande.validation.valideur.prenom}`;
+            }
+            
+            alert(details);
+        }
+
+        function downloadPDF(id) {
+            const demande = demandes.find(d => d.id === id);
+            if (demande) {
+                generatePDF(demande);
+            }
+        }
+
+        function updateStatus(id, newStatus) {
+            const index = demandes.findIndex(d => d.id === id);
+            if (index !== -1) {
+                demandes[index].status = newStatus;
+                localStorage.setItem('sncf_demandes', JSON.stringify(demandes));
+                loadAdminData();
+                
+                const message = newStatus === 'approved' ? 'Demande approuvée' : 'Demande refusée';
+                alert(message);
+            }
+        }
+
+        function deleteDemande(id) {
+            if (confirm('Supprimer cette demande ?')) {
+                demandes = demandes.filter(d => d.id !== id);
+                localStorage.setItem('sncf_demandes', JSON.stringify(demandes));
+                loadAdminData();
+            }
+        }
+
+        function exportAllPDF() {
+            if (demandes.length === 0) {
+                alert('Aucune demande à exporter.');
+                return;
+            }
+            
+            demandes.forEach(demande => {
+                generatePDF(demande);
+            });
+            
+            alert(`${demandes.length} PDF générés.`);
+        }
+
+        window.addEventListener('load', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.min = today;
+            });
+        });
+    </script>
+</body>
+</html>
